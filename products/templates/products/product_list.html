@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Our Store</title>
+</head>
+<body>
+    <h1>Product Catalog</h1>
+
+    <ul>
+    <!-- Loop through the 'products' dictionary from views.py -->
+    {% for item in products %}
+        <li>
+            <!-- Display product attributes -->
+            <h2>{{ item.name }}</h2>
+            <p>Price: Rs.{{ item.price }}</p>
+            <p>{{ item.description }}</p>
+            
+            <!-- Generate a dynamic link using the URL's nickname and product ID -->
+            <a href="{% url 'product_detail' item.pk %}">View Details</a>
+        </li>
+    
+    <!-- Fallback message if the database is empty -->
+    {% empty %}
+        <p>No products are currently available.</p>
+    {% endfor %}
+    </ul>
+
+</body>
+</html>
