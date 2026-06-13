@@ -9,6 +9,9 @@
     <h1>{{ product.name }}</h1>
     <p>Price: Rs.{{ product.price }}</p>
     <p>Description: {{ product.description }}</p>
+    <a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary mt-3">
+        Add to Cart
+    </a>
 
     <br>
     <a href="{% url 'product_list' %}">⬅ Back to Catalog</a>
