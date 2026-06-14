@@ -29,8 +29,9 @@
                     <h5 class="text-success fw-bold mb-3">Rs. {{ item.price }}</h5>
                     <div class="d-grid gap-2">
                         <form action="{% url 'add_to_cart' item.id %}" method="POST">
-                                    {% csrf_token %}
-                                 <button type="submit" class="btn btn-primary w-100 mb-2">Add to Cart</button>
+                         {% csrf_token %}
+                         <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary w-100 mb-2">Add to Cart</button>
                         </form>
                         <a href="{% url 'product_detail' item.pk %}" class="btn btn-outline-secondary">View Details</a>
                     </div>

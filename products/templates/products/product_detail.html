@@ -31,9 +31,10 @@
                 <!-- Note: Keeping the button simple just like the homepage for now! -->
                 <form action="{% url 'add_to_cart' product.id %}" method="POST">
                     {% csrf_token %}
+                    <input type="hidden" name="quantity" value="1">
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg shadow-sm">Add to Cart</button>
-                        <a href="{% url 'product_list' %}" class="btn btn-outline-secondary btn-lg">Back to Catalog</a>
+                    <button type="submit" class="btn btn-primary btn-lg shadow-sm">Add to Cart</button>
+                <a href="{% url 'product_list' %}" class="btn btn-outline-secondary btn-lg">Back to Catalog</a>
                     </div>
                 </form>
             </div>
