@@ -19,7 +19,11 @@
                     <tbody>
                         {% for order in orders %}
                         <tr>
-                            <td class="fw-bold">#{{ order.id }}</td>
+                            <td>
+                                <a href="{% url 'order_detail' order.id %}" class="text-decoration-none fw-bold text-primary">
+                                          #{{ order.id }}
+                                         </a>
+                            </td>
                             <!-- Adjust the field names (like created_at or total_price) based on your actual Order model -->
                             <td>{{ order.created_at|date:"M d, Y" }}</td>
                             <td><span class="badge bg-success">Completed</span></td>
