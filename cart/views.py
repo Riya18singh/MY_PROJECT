@@ -117,3 +117,11 @@ def checkout(request):
         
     # Fallback just in case they load the page incorrectly
     return redirect('cart_detail')
+
+@login_required(login_url='login')
+def order_detail(request, order_id):
+    # Security Check: Find the specific order, but ONLY if it belongs to this logged-in user!
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    # Send the data to a brand new receipt HTML page
+    return render(request, 'products/order_detail.html', {'order': order})
