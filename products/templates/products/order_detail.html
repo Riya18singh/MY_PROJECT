@@ -1,0 +1,47 @@
+{% extends 'products/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <a href="{% url 'order_history' %}" class="btn btn-outline-secondary mb-4">&larr; Back to My Orders</a>
+
+    <div class="card shadow border-0">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+            <h4 class="mb-0 fw-bold">Order #{{ order.id }}</h4>
+            <span class="badge bg-success fs-6">Completed</span>
+        </div>
+        
+        <div class="card-body p-4">
+            <p class="text-muted mb-4">Placed on {{ order.created_at|date:"F d, Y" }}</p>
+
+            <h5 class="fw-bold border-bottom pb-2 mb-3">Items in this Order</h5>
+            
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items.all %}
+                        <tr>
+                            <td class="fw-bold">{{ item.product.name }}</td>
+                            <td>Rs. {{ item.price }}</td>
+                            <td>{{ item.quantity }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-group-divider">
+                        <tr>
+                            <td colspan="2" class="text-end fw-bold fs-5 pt-3">Grand Total:</td>
+                            <td class="fw-bold text-success fs-5 pt-3">Rs. {{ order.total_price }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
