@@ -25,7 +25,7 @@
                     
                     {% if user.is_authenticated %}
                         <li class="nav-item me-4">
-                            <a class="nav-link fs-5" href="#">My Orders</a>
+                            <a class="nav-link fs-5" href="{% url 'order_history' %}">My Orders</a>
                         </li>
                         <li class="nav-item">
                             <span class="nav-link text-warning fw-semibold">Hello, {{ user.username }}!</span>
