@@ -90,18 +90,24 @@ def checkout(request):
         order = Order.objects.create(
             user=request.user,
             total_price=total_price
-            # Status automatically defaults to 'pending'
-            # created_at automatically sets to right now
         )
         
-        # 4. Copy the items from the Cart into the Order receipt
+        # 4. Copy the items from the Cart to the Order AND update inventory
         for cart_item in cart.items.all():
+            product = cart_item.product
+            quantity_bought = cart_item.quantity
+            
+            # Create the receipt item
             OrderItem.objects.create(
                 order=order,
-                product=cart_item.product,
-                quantity=cart_item.quantity,
-                price=cart_item.product.price
+                product=product,
+                quantity=quantity_bought,
+                price=product.price
             )
+            
+            # quantity deducted
+            product.stock -= quantity_bought
+            product.save()
             
         # 5. Empty the shopping cart
         cart.items.all().delete()
