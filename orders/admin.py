@@ -1,7 +1,14 @@
 from django.contrib import admin
-
-# Register your models here.
 from .models import Order, OrderItem
 
-admin.site.register(Order)
-admin.site.register(OrderItem)
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+    readonly_fields = ('price',) # Prevents accidentally changing past receipt prices
+
+class OrderAdmin(admin.ModelAdmin):
+    inlines = [OrderItemInline]
+    list_display = ['id', 'user', 'status', 'total_price', 'created_at']
+    list_filter = ['status', 'created_at']
+
+admin.site.register(Order, OrderAdmin)
