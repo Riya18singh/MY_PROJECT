@@ -13,6 +13,24 @@
             </p>
         </div>
     </div>
+    <div class="row mb-4 bg-light p-3 rounded shadow-sm align-items-center mx-0">
+        <div class="col-md-7 mb-2 mb-md-0">
+            <span class="fw-bold me-2">Filter:</span>
+            <a href="{% url 'product_list' %}" class="btn btn-outline-primary btn-sm me-1 mb-1">All</a>
+            {% for category in categories %}
+                <a href="{% url 'product_list' %}?category={{ category.id }}" class="btn btn-outline-primary btn-sm me-1 mb-1">
+                    {{ category.name }}
+                </a>
+            {% endfor %}
+        </div>
+        
+        <div class="col-md-5">
+            <form method="GET" action="{% url 'product_list' %}" class="d-flex">
+                <input type="text" name="q" class="form-control me-2" placeholder="Search products..." value="{{ request.GET.q }}">
+                <button type="submit" class="btn btn-dark">Search</button>
+            </form>
+        </div>
+    </div>
 
     <div class="row">
         {% for item in products %}
