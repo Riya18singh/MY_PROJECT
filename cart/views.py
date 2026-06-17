@@ -1,10 +1,15 @@
 # Create your views here.
+import razorpay
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from products.models import Product
 from django.contrib import messages
 from .models import Cart, CartItem
 from orders.models import Order, OrderItem
+from django.views.decorators.csrf import csrf_exempt
+
+razor_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
 # The @login_required decorator forces users to log in before adding to cart
 @login_required(login_url='login')
@@ -79,43 +84,49 @@ def order_history(request):
 
 @login_required(login_url='login')
 def checkout(request):
+    cart = Cart.objects.get(user=request.user)
+    total_price = sum(item.product.price * item.quantity for item in cart.items.all())
+    
+    # Razorpay calculates everything in PAISE (1 Rupee = 100 Paise)
+    # So we multiply your total price by 100
+    razorpay_amount = int(total_price * 100)
+
     if request.method == 'POST':
-        # 1. Find the user's current cart
-        cart = Cart.objects.get(user=request.user)
-        
-        # 2. Calculate the total price
-        total_price = sum(item.product.price * item.quantity for item in cart.items.all())
-        
-        # 3. Create the permanent Order receipt
+        # 1. Create a secure transaction order with Razorpay's server
+        razorpay_order = razor_client.order.create({
+            "amount": razorpay_amount,
+            "currency": "INR",
+            "payment_capture": "1"  # 1 means automatically capture the money immediately
+        })
+
+        # 2. Create the permanent Order receipt in YOUR database as 'pending'
         order = Order.objects.create(
             user=request.user,
-            total_price=total_price
+            total_price=total_price,
+            status='pending'  # It stays pending until the payment gateway says "Success!"
         )
         
-        # 4. Copy the items from the Cart to the Order AND update inventory
+        # 3. Copy the items from the Cart to the Order
         for cart_item in cart.items.all():
-            product = cart_item.product
-            quantity_bought = cart_item.quantity
-            
-            # Create the receipt item
             OrderItem.objects.create(
                 order=order,
-                product=product,
-                quantity=quantity_bought,
-                price=product.price
+                product=cart_item.product,
+                quantity=cart_item.quantity,
+                price=cart_item.product.price
             )
-            
-            # quantity deducted
-            product.stock -= quantity_bought
-            product.save()
-            
-        # 5. Empty the shopping cart
-        cart.items.all().delete()
+
+        # 4. Send all this information to a checkout page where the payment pop-up will appear
+        context = {
+            'order': order,
+            'cart': cart,
+            'total_price': total_price,
+            'razorpay_order_id': razorpay_order['id'],
+            'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+            'razorpay_amount': razorpay_amount,
+        }
+        return render(request, 'cart/razorpay_checkout.html', context)
         
-        # 6. Send the user straight to their newly updated Order History!
-        return redirect('order_history')
-        
-    # Fallback just in case they load the page incorrectly
+    # If they just view the page via GET, redirect them back to the cart details
     return redirect('cart_detail')
 
 @login_required(login_url='login')
@@ -125,3 +136,40 @@ def order_detail(request, order_id):
     
     # Send the data to a brand new receipt HTML page
     return render(request, 'products/order_detail.html', {'order': order})
+
+@csrf_exempt
+def payment_success(request):
+    if request.method == 'POST':
+        # 1. Grab the secure data Razorpay sends back
+        razorpay_payment_id = request.POST.get('razorpay_payment_id')
+        razorpay_order_id = request.POST.get('razorpay_order_id')
+        razorpay_signature = request.POST.get('razorpay_signature')
+        internal_order_id = request.POST.get('order_id')
+
+        # 2. Verify the payment is 100% authentic
+        try:
+            razor_client.utility.verify_payment_signature({
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': razorpay_payment_id,
+                'razorpay_signature': razorpay_signature
+            })
+            
+            # 3. Find the order directly by its ID (bypassing the missing cookie)
+            order = Order.objects.get(id=internal_order_id)
+            order.status = 'Paid' 
+            order.save()
+
+            # 4. Find the cart using the Order's user, and empty it
+            cart = Cart.objects.get(user=order.user)
+            cart.items.all().delete()
+
+            # 5. Show a success message and send them to their digital receipt
+            messages.success(request, f"Payment successful! Order #{order.id} is confirmed.")
+            return redirect('order_detail', order_id=order.id)
+
+        # 6. If the signature is fake or fails, block the order
+        except razorpay.errors.SignatureVerificationError:
+            messages.error(request, "Payment verification failed. Please try again.")
+            return redirect('cart_detail')
+            
+    return redirect('cart_detail')      
