@@ -24,6 +24,15 @@
             
             <h2 class="fw-bold mb-3">{{ product.name }}</h2>
             <h3 class="text-success fw-bold mb-4">Rs. {{ product.price }}</h3>
+            <div class="mb-4">
+    <a href="?convert=usd" class="btn btn-sm btn-outline-info">View Live Price in USD 🇺🇸</a>
+    
+    {% if usd_price %}
+        <p class="text-primary fw-bold mt-2 border p-2 rounded bg-light">
+            Live Converted Price: ${{ usd_price }}
+        </p>
+    {% endif %}
+</div>
             
             <p class="text-muted fs-5 mb-5">{{ product.description }}</p>
             
