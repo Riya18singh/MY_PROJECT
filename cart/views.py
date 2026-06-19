@@ -86,27 +86,36 @@ def order_history(request):
 def checkout(request):
     cart = Cart.objects.get(user=request.user)
     total_price = sum(item.product.price * item.quantity for item in cart.items.all())
-    
-    # Razorpay calculates everything in PAISE (1 Rupee = 100 Paise)
-    # So we multiply your total price by 100
+
+    # Razorpay uses paise
     razorpay_amount = int(total_price * 100)
 
     if request.method == 'POST':
-        # 1. Create a secure transaction order with Razorpay's server
-        razorpay_order = razor_client.order.create({
-            "amount": razorpay_amount,
-            "currency": "INR",
-            "payment_capture": "1"  # 1 means automatically capture the money immediately
-        })
 
-        # 2. Create the permanent Order receipt in YOUR database as 'pending'
+        print("RAZORPAY KEY:", settings.RAZORPAY_KEY_ID)
+        print("AMOUNT:", razorpay_amount)
+
+        try:
+            razorpay_order = razor_client.order.create({
+                "amount": razorpay_amount,
+                "currency": "INR",
+                "payment_capture": 1
+            })
+
+            print("ORDER CREATED:", razorpay_order)
+
+        except Exception as e:
+            print("RAZORPAY ERROR:", e)
+            raise
+
+        # Create order in database
         order = Order.objects.create(
             user=request.user,
             total_price=total_price,
-            status='pending'  # It stays pending until the payment gateway says "Success!"
+            status='pending'
         )
-        
-        # 3. Copy the items from the Cart to the Order
+
+        # Copy cart items into order items
         for cart_item in cart.items.all():
             OrderItem.objects.create(
                 order=order,
@@ -115,7 +124,6 @@ def checkout(request):
                 price=cart_item.product.price
             )
 
-        # 4. Send all this information to a checkout page where the payment pop-up will appear
         context = {
             'order': order,
             'cart': cart,
@@ -124,9 +132,9 @@ def checkout(request):
             'razorpay_key_id': settings.RAZORPAY_KEY_ID,
             'razorpay_amount': razorpay_amount,
         }
+
         return render(request, 'cart/razorpay_checkout.html', context)
-        
-    # If they just view the page via GET, redirect them back to the cart details
+
     return redirect('cart_detail')
 
 @login_required(login_url='login')
