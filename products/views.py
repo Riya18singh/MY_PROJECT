@@ -3,6 +3,7 @@ from .models import Product, Category
 import requests
 from django.conf import settings
 from decimal import Decimal
+from django.http import JsonResponse
 
 def product_list(request):
     # 1. Grab all active products and all categories
@@ -45,4 +46,9 @@ def product_detail(request, pk):
     return render(request, 'products/product_detail.html', {
         'product': product,
         'usd_price': usd_price
-    })
+    })  
+
+def total_product_api(request):
+    count=Product.objects.count()
+    return JsonResponse({'total items': count})    
+

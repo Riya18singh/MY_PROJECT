@@ -13,7 +13,7 @@ class Product(models.Model):
     image = models.ImageField(upload_to='products/')
     description = models.TextField(blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
-    stock = models.IntegerField(default=20) # Starting every product with 20 items in stock for now
+    stock = models.IntegerField(default=20)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
