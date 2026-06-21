@@ -64,3 +64,14 @@ def on_sale_api(request):
         })
     return JsonResponse({'items on sale':data})
 
+def product_info_api(request,product_id):
+    product=Product.objects.get(id=product_id)
+
+    return JsonResponse({
+        'name':product.name,
+        'price':product.price,
+        'rating':product.rating,
+        'is_on_sale':product.on_sale
+    })    
+
+
