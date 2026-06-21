@@ -1,0 +1,45 @@
+{% extends 'products/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 fw-bold">My Order History</h2>
+
+    {% if orders %}
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Total Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'order_detail' order.id %}" class="text-decoration-none fw-bold text-primary">
+                                          #{{ order.id }}
+                                         </a>
+                            </td>
+                            <!-- Adjust the field names (like created_at or total_price) based on your actual Order model -->
+                            <td>{{ order.created_at|date:"M d, Y" }}</td>
+                            <td><span class="badge bg-success">Completed</span></td>
+                            <td>Rs. {{ order.total_price }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center py-5 shadow-sm" role="alert">
+            <h4 class="alert-heading fw-bold mb-3">No orders yet!</h4>
+            <p>You haven't placed any orders with us. Time to go shopping!</p>
+            <a href="{% url 'product_list' %}" class="btn btn-primary mt-2">Browse Products</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

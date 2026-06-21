@@ -1,0 +1,41 @@
+{% extends 'products/base.html' %}
+
+{% block title %}Secure Checkout - My Ecom{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white text-center py-3">
+                    <h4 class="mb-0 fw-bold">Secure Checkout 🔒</h4>
+                </div>
+                <div class="card-body p-4 text-center">
+                    <h5 class="mb-3">Order Total: <span class="text-success fw-bold">Rs. {{ total_price }}</span></h5>
+                    <p class="text-muted mb-4">You are about to pay securely via Razorpay.</p>
+
+                    <!-- The Official Razorpay Payment Form -->
+                    <form action="{% url 'payment_success' %}" method="POST">
+                        {% csrf_token %}
+                        <!-- We pass the order ID so we know exactly which order to update later -->
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        
+                        <!-- This script automatically creates the Razorpay "Pay Now" button and pop-up -->
+                        <script
+                            src="https://checkout.razorpay.com/v1/checkout.js"
+                            data-key="{{ razorpay_key_id }}"
+                            data-amount="{{ razorpay_amount }}"
+                            data-currency="INR"
+                            data-order_id="{{ razorpay_order_id }}"
+                            data-buttontext="Pay Now with Razorpay"
+                            data-name="My Ecom Store"
+                            data-description="Payment for Order #{{ order.id }}"
+                            data-theme.color="#212529">
+                        </script>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'products/base.html' %}
+
+{% block title %}Home - My Ecom{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <div class="p-5 mb-4 bg-light rounded-3 text-center shadow-sm mt-4">
+        <div class="container-fluid py-2">
+            <h1 class="display-5 fw-bold">Welcome to My Ecom</h1>
+            <p class="col-md-8 mx-auto fs-5 text-muted">
+                Browse our latest tech products and add them straight to your cart.
+            </p>
+        </div>
+    </div>
+    <div class="row mb-4 bg-light p-3 rounded shadow-sm align-items-center mx-0">
+        <div class="col-md-7 mb-2 mb-md-0">
+            <span class="fw-bold me-2">Filter:</span>
+            <a href="{% url 'product_list' %}" class="btn btn-outline-primary btn-sm me-1 mb-1">All</a>
+            {% for category in categories %}
+                <a href="{% url 'product_list' %}?category={{ category.id }}" class="btn btn-outline-primary btn-sm me-1 mb-1">
+                    {{ category.name }}
+                </a>
+            {% endfor %}
+        </div>
+        
+        <div class="col-md-5">
+            <form method="GET" action="{% url 'product_list' %}" class="d-flex">
+                <input type="text" name="q" class="form-control me-2" placeholder="Search products..." value="{{ request.GET.q }}">
+                <button type="submit" class="btn btn-dark">Search</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for item in products %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body bg-light rounded text-center mb-2 mt-2 mx-2">
+                    <h1 class="display-1 text-secondary py-4">📦</h1>
+                </div>
+                <div class="card-body px-4 py-2">
+                    <h4 class="card-title fw-bold">{{ item.name }}</h4>
+                    <p class="card-text text-muted small">{{ item.description|truncatewords:15 }}</p>
+                </div>
+                <div class="card-footer bg-white border-0 px-4 pb-4">
+                    <h5 class="text-success fw-bold mb-3">Rs. {{ item.price }}</h5>
+                    <div class="d-grid gap-2">
+                        <form action="{% url 'add_to_cart' item.id %}" method="POST">
+                         {% csrf_token %}
+                         <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary w-100 mb-2">Add to Cart</button>
+                        </form>
+                        <a href="{% url 'product_detail' item.pk %}" class="btn btn-outline-secondary">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
