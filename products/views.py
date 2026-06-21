@@ -52,3 +52,15 @@ def total_product_api(request):
     count=Product.objects.count()
     return JsonResponse({'total items': count})    
 
+
+def on_sale_api(request):
+    sale_items=Product.objects.filter(on_sale=True,is_active=True)
+
+    data=[]
+    for item in sale_items:
+        data.append({
+            'name':item.name,
+            'price':item.price
+        })
+    return JsonResponse({'items on sale':data})
+
