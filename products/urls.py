@@ -9,4 +9,6 @@ urlpatterns = [
     path('<int:pk>/', views.product_detail, name='product_detail'),
     path('api/stats/', views.total_product_api, name='api stats'),
     path('api/on-sale/', views.on_sale_api, name='api-on-sale'),
+    path('api/info/<int:product_id>/', views.product_info_api, name='api-product-info'),
 ]
+
